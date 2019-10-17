@@ -5,7 +5,7 @@ authors = ["Louis Thiery <louis@helium.com>"]
 edition = "2018"
 
 [dependencies]
-cmwx1zzabz = { git = "git@github.com:lthiery/cmwx1zzabz-rs.git", branch = "master"}
+cmwx1zzabz = { git = "ssh://git@github.com/lthiery/cmwx1zzabz-rs.git", branch = "master"}
 embedded-hal = { version = "0.2.3", features = ["unproven"] }
 nb = "0.1.2"
 
