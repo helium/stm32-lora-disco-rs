@@ -9,12 +9,6 @@ cmwx1zzabz = { git = "ssh://git@github.com/lthiery/cmwx1zzabz-rs.git", branch = 
 embedded-hal = { version = "0.2.3", features = ["unproven"] }
 nb = "0.1.2"
 
-[dependencies.stm32l0xx-hal]
-git                     = "https://github.com/lthiery/stm32l0xx-hal.git"
-features                = ["stm32l0x2","rt"]
-branch                  = "enable-spi2"
-
-
 [dev-dependencies]
 cortex-m    = "0.6.1"
 cortex-m-rt = "0.6.10"
