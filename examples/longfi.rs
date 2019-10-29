@@ -7,16 +7,15 @@
 extern crate nb;
 extern crate panic_halt;
 
-use stm32l0xx_hal as hal;
-use hal::{gpio::*, pac, prelude::*, rng::Rng, rcc, serial, syscfg};
+use hal::{gpio::*, pac, prelude::*, rcc, rng::Rng, serial, syscfg};
 use rtfm::{app, Exclusive};
+use stm32l0xx_hal as hal;
 
 use longfi_device;
 use longfi_device::{ClientEvent, Config, LongFi, RadioType, RfEvent};
 
-use core::fmt::Write;
 use b_l072z_lrwan1;
-
+use core::fmt::Write;
 
 static mut PRESHARED_KEY: [u8; 16] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
@@ -88,11 +87,17 @@ const APP: () = {
             auth_mode: longfi_device::AuthMode::PresharedKey128,
         };
 
-
         let mut longfi_radio;
         if let Some(bindings) = BINDINGS {
-            longfi_radio =
-                unsafe { LongFi::new(RadioType::Sx1276, &mut bindings.bindings, rf_config, &PRESHARED_KEY).unwrap() };
+            longfi_radio = unsafe {
+                LongFi::new(
+                    RadioType::Sx1276,
+                    &mut bindings.bindings,
+                    rf_config,
+                    &PRESHARED_KEY,
+                )
+                .unwrap()
+            };
         } else {
             panic!("No bindings exist");
         }
@@ -124,9 +129,24 @@ const APP: () = {
                 // get receive buffer
                 let rx_packet = longfi_radio.get_rx();
                 write!(ctx.resources.debug_uart, "Received packet\r\n").unwrap();
-                write!(ctx.resources.debug_uart, "  Length =  {}\r\n", rx_packet.len).unwrap();
-                write!(ctx.resources.debug_uart, "  Rssi   = {}\r\n", rx_packet.rssi).unwrap();
-                write!(ctx.resources.debug_uart, "  Snr    =  {}\r\n", rx_packet.snr).unwrap();
+                write!(
+                    ctx.resources.debug_uart,
+                    "  Length =  {}\r\n",
+                    rx_packet.len
+                )
+                .unwrap();
+                write!(
+                    ctx.resources.debug_uart,
+                    "  Rssi   = {}\r\n",
+                    rx_packet.rssi
+                )
+                .unwrap();
+                write!(
+                    ctx.resources.debug_uart,
+                    "  Snr    =  {}\r\n",
+                    rx_packet.snr
+                )
+                .unwrap();
                 unsafe {
                     for i in 0..rx_packet.len {
                         write!(
@@ -146,7 +166,7 @@ const APP: () = {
     }
 
     #[task(capacity = 4, priority = 2, resources = [debug_uart, count, longfi])]
-    fn send_ping(ctx :send_ping::Context) {
+    fn send_ping(ctx: send_ping::Context) {
         write!(ctx.resources.debug_uart, "Sending Ping\r\n").unwrap();
         let packet: [u8; 72] = [
             0xDE,
