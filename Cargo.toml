@@ -1,11 +1,11 @@
 [package]
-name    = "b-l072z-lrwan1"
+name    = "stm32-lora-disco"
 version = "0.1.0"
 authors = ["Louis Thiery <louis@helium.com>"]
 edition = "2018"
 
 [dependencies]
-cmwx1zzabz = { git = "ssh://git@github.com/lthiery/cmwx1zzabz-rs.git", branch = "master"}
+cmwx1zzabz = { git = "https://git@github.com/lthiery/cmwx1zzabz-rs.git", branch = "master"}
 
 [dependencies.stm32l0xx-hal]
 git                     = "https://github.com/lthiery/stm32l0xx-hal.git"
@@ -19,7 +19,7 @@ nb          = "0.1.2"
 panic-halt  = "0.2.0"
 usb-device  = "0.2.3"
 usbd-serial = "0.1.0"
-longfi-device = { git = "ssh://git@github.com/helium/longfi-device-rs.git", tag = "0.1.0"}
+longfi-device = { git = "https://github.com/helium/longfi-device-rs.git", tag = "0.1.0"}
 
 [dev-dependencies.cortex-m-rtfm]
 git = "https://github.com/rtfm-rs/cortex-m-rtfm.git"

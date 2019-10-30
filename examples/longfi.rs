@@ -7,15 +7,15 @@
 extern crate nb;
 extern crate panic_halt;
 
-use hal::{gpio::*, pac, prelude::*, rcc, rng::Rng, serial, syscfg};
-use rtfm::{app, Exclusive};
+use hal::{pac, prelude::*, rcc, rng::Rng, serial, syscfg};
+use rtfm::app;
 use stm32l0xx_hal as hal;
 
 use longfi_device;
 use longfi_device::{ClientEvent, Config, LongFi, RadioType, RfEvent};
 
-use b_l072z_lrwan1;
 use core::fmt::Write;
+use stm32_lora_disco;
 
 static mut PRESHARED_KEY: [u8; 16] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
@@ -27,9 +27,9 @@ pub extern "C" fn get_preshared_key() -> *mut u8 {
 const APP: () = {
     struct Resources {
         int: pac::EXTI,
-        radio_irq: b_l072z_lrwan1::RadioIRQ,
-        debug_uart: serial::Tx<b_l072z_lrwan1::DebugUsart>,
-        uart_rx: serial::Rx<b_l072z_lrwan1::DebugUsart>,
+        radio_irq: stm32_lora_disco::RadioIRQ,
+        debug_uart: serial::Tx<stm32_lora_disco::DebugUsart>,
+        uart_rx: serial::Rx<stm32_lora_disco::DebugUsart>,
         #[init([0;512])]
         buffer: [u8; 512],
         #[init(0)]
@@ -39,9 +39,8 @@ const APP: () = {
 
     #[init(spawn = [send_ping], resources = [buffer])]
     fn init(ctx: init::Context) -> init::LateResources {
-        static mut BINDINGS: Option<b_l072z_lrwan1::LongFiBindings> = None;
+        static mut BINDINGS: Option<stm32_lora_disco::LongFiBindings> = None;
         let device = ctx.device;
-        let core = ctx.core;
 
         let mut rcc = device.RCC.freeze(rcc::Config::hsi16());
         let mut syscfg = syscfg::SYSCFG::new(device.SYSCFG_COMP, &mut rcc);
@@ -58,15 +57,15 @@ const APP: () = {
 
         // listen for incoming bytes which will trigger transmits
         serial.listen(serial::Event::Rxne);
-        let (mut tx, mut rx) = serial.split();
+        let (mut tx, rx) = serial.split();
 
         write!(tx, "LongFi Device Test\r\n").unwrap();
 
         let mut exti = device.EXTI;
         let rng = Rng::new(device.RNG, &mut rcc, &mut syscfg, device.CRS);
-        let radio_irq = b_l072z_lrwan1::initialize_radio_irq(gpiob.pb4, &mut syscfg, &mut exti);
+        let radio_irq = stm32_lora_disco::initialize_radio_irq(gpiob.pb4, &mut syscfg, &mut exti);
 
-        *BINDINGS = Some(b_l072z_lrwan1::LongFiBindings::new(
+        *BINDINGS = Some(stm32_lora_disco::LongFiBindings::new(
             device.SPI1,
             &mut rcc,
             rng,
@@ -118,7 +117,7 @@ const APP: () = {
 
     #[task(capacity = 4, priority = 2, resources = [debug_uart, buffer, longfi])]
     fn radio_event(ctx: radio_event::Context, event: RfEvent) {
-        let mut longfi_radio = ctx.resources.longfi;
+        let longfi_radio = ctx.resources.longfi;
         let client_event = longfi_radio.handle_event(event);
 
         match client_event {
@@ -248,7 +247,7 @@ const APP: () = {
 
     #[task(binds = USART1, priority=1, resources = [uart_rx], spawn = [send_ping])]
     fn USART1(ctx: USART1::Context) {
-        let mut rx = ctx.resources.uart_rx;
+        let rx = ctx.resources.uart_rx;
         rx.read().unwrap();
         ctx.spawn.send_ping().unwrap();
     }
