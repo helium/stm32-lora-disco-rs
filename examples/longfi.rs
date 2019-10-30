@@ -17,11 +17,7 @@ use longfi_device::{ClientEvent, Config, LongFi, RadioType, RfEvent};
 use core::fmt::Write;
 use stm32_lora_disco;
 
-static mut PRESHARED_KEY: [u8; 16] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-
-pub extern "C" fn get_preshared_key() -> *mut u8 {
-    unsafe { &mut PRESHARED_KEY[0] as *mut u8 }
-}
+static mut PRESHARED_KEY: [u8; 16] = [0x7B, 0x60, 0xC0, 0xF0, 0x77, 0x51, 0x50, 0xD3, 0x2, 0xCE, 0xAE, 0x50, 0xA0, 0xD2, 0x11, 0xC1];
 
 #[app(device = stm32l0xx_hal::pac, peripherals = true)]
 const APP: () = {
@@ -81,8 +77,8 @@ const APP: () = {
         ));
 
         let rf_config = Config {
-            oui: 1234,
-            device_id: 5678,
+            oui: 1,
+            device_id: 3,
             auth_mode: longfi_device::AuthMode::PresharedKey128,
         };
 
@@ -245,8 +241,8 @@ const APP: () = {
         ctx.resources.longfi.send(&packet);
     }
 
-    #[task(binds = USART1, priority=1, resources = [uart_rx], spawn = [send_ping])]
-    fn USART1(ctx: USART1::Context) {
+    #[task(binds = USART2, priority=1, resources = [uart_rx], spawn = [send_ping])]
+    fn USART2(ctx: USART2::Context) {
         let rx = ctx.resources.uart_rx;
         rx.read().unwrap();
         ctx.spawn.send_ping().unwrap();

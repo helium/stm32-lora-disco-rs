@@ -23,7 +23,7 @@ To start the debug server, from this project directory, do:
 
 ### JLink & JLinkServer
 
-If you have a preference for JLink, you can actually [turn the ST-Link into a JLink debugger!](https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/).
+If you have a preference for JLink, you can actually [turn the ST-Link into a JLink debugger](https://www.segger.com/products/debug-probes/j-link/models/other-j-links/st-link-on-board/).
 
 Download the [JLink server utility](https://www.segger.com/products/debug-probes/j-link/tools/j-link-gdb-server/about-j-link-gdb-server/) if you don't have it.
 
@@ -38,13 +38,3 @@ cargo run --example longfi
 ```
 
 [OpenOCD]: http://openocd.org/
-
-
-## License
-
-This project is open source software, licensed under the terms of the [Zero Clause BSD License][] (0BSD, for short). This basically means you can do anything with the software, without any restrictions, but you can't hold the authors liable for problems.
-
-See [LICENSE.md] for full details.
-
-[Zero Clause BSD License]: https://opensource.org/licenses/0BSD
-[LICENSE.md]: https://github.com/braun-embedded/rust-catena-4610/blob/master/LICENSE.md
