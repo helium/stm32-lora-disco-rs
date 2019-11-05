@@ -1,4 +1,4 @@
-# Tracker Feather Board Support Crate
+# stm32-lora-disco-rs 
 
 ## About
 
