@@ -41,7 +41,7 @@ const APP: () = {
         let device = ctx.device;
 
         let mut rcc = device.RCC.freeze(rcc::Config::hsi16());
-        let mut syscfg = syscfg::SYSCFG::new(device.SYSCFG_COMP, &mut rcc);
+        let mut syscfg = syscfg::SYSCFG::new(device.SYSCFG, &mut rcc);
 
         let gpioa = device.GPIOA.split(&mut rcc);
         let gpiob = device.GPIOB.split(&mut rcc);
@@ -59,8 +59,9 @@ const APP: () = {
 
         write!(tx, "LongFi Device Test\r\n").unwrap();
 
+        let hsi48 = rcc.enable_hsi48(&mut syscfg, device.CRS);
+        let rng = Rng::new(device.RNG, &mut rcc, hsi48);
         let mut exti = device.EXTI;
-        let rng = Rng::new(device.RNG, &mut rcc, &mut syscfg, device.CRS);
         let radio_irq = stm32_lora_disco::initialize_radio_irq(gpiob.pb4, &mut syscfg, &mut exti);
 
         *BINDINGS = Some(stm32_lora_disco::LongFiBindings::new(
@@ -252,7 +253,7 @@ const APP: () = {
 
     #[task(binds = EXTI4_15, priority = 1, resources = [radio_irq, int], spawn = [radio_event])]
     fn EXTI4_15(ctx: EXTI4_15::Context) {
-        ctx.resources.int.clear_irq(ctx.resources.radio_irq.i);
+        ctx.resources.int.clear_irq(ctx.resources.radio_irq.pin_number());
         ctx.spawn.radio_event(RfEvent::DIO0).unwrap();
     }
 
