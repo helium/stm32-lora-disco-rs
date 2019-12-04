@@ -12,13 +12,13 @@ use rtfm::app;
 use stm32l0xx_hal as hal;
 
 use longfi_device;
-use longfi_device::{ClientEvent, Config, LongFi, RadioType, RfEvent};
+use longfi_device::{ClientEvent, Config, LongFi, Radio, RfEvent};
 
 use core::fmt::Write;
 use stm32_lora_disco;
 
-static mut PRESHARED_KEY: [u8; 16] = [
-    0x7B, 0x60, 0xC0, 0xF0, 0x77, 0x51, 0x50, 0xD3, 0x2, 0xCE, 0xAE, 0x50, 0xA0, 0xD2, 0x11, 0xC1,
+static PRESHARED_KEY: [u8; 16] = [
+    0xB, 0x28, 0xDA, 0xB9, 0x7D, 0x86, 0x2D, 0x77, 0x20, 0x65, 0x60, 0x75, 0xAC, 0xBA, 0x3D, 0x82,
 ];
 
 #[app(device = stm32l0xx_hal::pac, peripherals = true)]
@@ -81,21 +81,19 @@ const APP: () = {
 
         let rf_config = Config {
             oui: 1,
-            device_id: 3,
+            device_id: 71,
             auth_mode: longfi_device::AuthMode::PresharedKey128,
         };
 
         let mut longfi_radio;
         if let Some(bindings) = BINDINGS {
-            longfi_radio = unsafe {
-                LongFi::new(
-                    RadioType::Sx1276,
-                    &mut bindings.bindings,
-                    rf_config,
-                    &PRESHARED_KEY,
-                )
-                .unwrap()
-            };
+            longfi_radio = LongFi::new(
+                Radio::sx1276(),
+                &mut bindings.bindings,
+                rf_config,
+                &PRESHARED_KEY,
+            )
+            .unwrap()
         } else {
             panic!("No bindings exist");
         }
@@ -253,7 +251,9 @@ const APP: () = {
 
     #[task(binds = EXTI4_15, priority = 1, resources = [radio_irq, int], spawn = [radio_event])]
     fn EXTI4_15(ctx: EXTI4_15::Context) {
-        ctx.resources.int.clear_irq(ctx.resources.radio_irq.pin_number());
+        ctx.resources
+            .int
+            .clear_irq(ctx.resources.radio_irq.pin_number());
         ctx.spawn.radio_event(RfEvent::DIO0).unwrap();
     }
 
